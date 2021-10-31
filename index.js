@@ -11,7 +11,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vj9mo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-console.log(client);
+// console.log(client);
 
 async function run() {
     try{
@@ -19,12 +19,42 @@ async function run() {
         console.log('database connected');
         const database = client.db("eCourier");
         const servicesCollection = database.collection("services");
+        const ordersCollection = database.collection("orders");
 
         // GET Sevices API
         app.get('/services', async(req, res) => {
             const result = await servicesCollection.find({}).toArray();
             // console.log(result);
             res.send(result);
+        })
+
+        // POST Services API
+        app.post('/addServices', async(req, res) => {
+          const result = await servicesCollection.insertOne(req.body);
+          res.send(result);
+        })
+
+        // get
+        app.get('/orderscollection', async(req, res) => {
+          const result = await ordersCollection.find({}).toArray();
+          console.log(result);
+          res.send(result);
+        })
+
+        // email
+        app.get("/myorders/:email", async (req, res) => {
+          const result = await ordersCollection
+            .find({ email: req.params.email })
+            .toArray();
+          res.send(result);
+        });
+
+        
+        // POst order
+        app.post('/orders', async(req, res) => {
+          const result = await ordersCollection.insertOne(req.body);
+          console.log(result);
+          res.send(result);
         })
 
     }
