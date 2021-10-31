@@ -46,15 +46,21 @@ async function run() {
     });
 
     // delete order collection
-    app.delete("/deleteorder/:id", async (req, res) => {
+    app.delete("/deletemyorder/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
-      console.log(ordersCollection);
-      // const result = await ordersCollection.deleteOne({_id: ObjectId(req.params.id)});
-      // console.log(result);
-      // res.send(result);
+      // console.log(ordersCollection);
+      const result = await ordersCollection.deleteOne({_id: ObjectId(id)});
+      console.log(result);
+      res.send(result);
     });
-
+    app.delete("/deleteorder/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("deleted id ", id);
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
+      res.json(result);
+    });
     // GET Email API
     app.get("/myorders/:email", async (req, res) => {
       const result = await ordersCollection
@@ -75,6 +81,22 @@ async function run() {
       const result = await ordersCollection.insertOne(req.body);
       console.log(result);
       res.send(result);
+
+      app.put('/updatestatus/:id', async (req, res) => {
+        const id = req.params.id;
+        const updatedUser = req.body;
+        const filter = { _id: ObjectId(id) };
+        const options = { upsert: true };
+        const updateDoc = {
+            $set: {
+                name: updatedUser.name,
+                email: updatedUser.email
+            },
+        };
+        const result = await ordersCollection.updateOne(filter, updateDoc, options)
+        console.log('updating', id)
+        res.json(result)
+    })
     });
   } finally {
     // await client.close()
